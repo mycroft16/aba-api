@@ -1,0 +1,17 @@
+{
+    "host": "ftp.one-equality.com",
+    "username": "abaapi@aba-api.one-equality.com",
+    "password": "Admina000509458)(!@",
+    "remotePath": "",
+    "protocol": "ftp",
+    "port": 0,
+    "fileNameEncoding": "utf8",
+    "autoUpload": true,
+    "autoDelete": true,
+    "autoDownload": false,
+    "ignore": [
+        ".git",
+        "/.vscode",
+        "/node_modules"
+    ]
+}
