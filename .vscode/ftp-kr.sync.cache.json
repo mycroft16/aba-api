@@ -8,9 +8,9 @@
     },
     ".htaccess": {
       "type": "-",
-      "size": 280,
+      "size": 281,
       "lmtime": 0,
-      "modified": false
+      "modified": true
     },
     ".well-known": {},
     "cgi-bin": {},
