@@ -12,31 +12,39 @@ if ($_SERVER['REQUEST_METHOD'] != "OPTIONS") {
 
     require_once('../../config.inc');
 
+    $hoursWithData = [];
+    $averageRange = array(
+        "average" => array(),
+        "max" => array(),
+        "min" => array()
+    );
+
     $student = '';
     if ($_GET['studentId'] != 'All') {
         $student = "`student` = '".$_GET['studentId']."' AND";
     }
 
-    $query = "SELECT 
-        `b`.*, 
-        CONCAT(`s`.`firstName`, ' ', `s`.`lastName`) AS `studentName` 
-    FROM 
-        `behaviors` `b`, 
-        `students` `s` 
-    WHERE
-        `b`.`student` = `s`.`id` AND  
-        ".$student." 
-        `start` BETWEEN '".$_GET['start']."' AND '".$_GET['end']."' 
-    ORDER BY 
-        `start` ASC";
+    $query = "SELECT * FROM `behaviors` WHERE ".$student." `start` BETWEEN '".$_GET['start']."' AND '".$_GET['end']."' ORDER BY `start` ASC";
     if ($res = $mysql->query($query)) {
 
-        $return = [];
         while ($row = $res->fetch_assoc()) {
-            $return[] = $row;
+            $hour = substr($row['start'], 0, 14)."00:00.000Z";
+            $hoursWithData[$hour][] = $row['duration'];
         }
+
+        foreach ($hoursWithData as $key => $value) {
+            $max = max($value) / 60000;
+            $min = min($value) / 60000;
+            $avg = (array_sum($value) / count($value)) / 60000;
+
+            $averageRange['average'][] = array($key, $avg);
+            $averageRange['max'][] = array($key, $max);
+            $averageRange['min'][] = array($key, $min);
+        }
+
+        $return = $averageRange;
         http_response_code(200);
-        
+
     } else {
 
         http_response_code(500);

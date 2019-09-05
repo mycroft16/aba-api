@@ -2,9 +2,9 @@
   "ftp://ftp.one-equality.com@abaapi@aba-api.one-equality.com": {
     ".ftpquota": {
       "type": "-",
-      "size": 6,
+      "size": 8,
       "lmtime": 0,
-      "modified": false
+      "modified": true
     },
     ".htaccess": {
       "type": "-",

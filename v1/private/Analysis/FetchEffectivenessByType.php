@@ -17,34 +17,22 @@ if ($_SERVER['REQUEST_METHOD'] != "OPTIONS") {
         $student = "`student` = '".$_GET['studentId']."' AND";
     }
 
-    $query = "SELECT 
-        `b`.*, 
-        CONCAT(`s`.`firstName`, ' ', `s`.`lastName`) AS `studentName` 
-    FROM 
-        `behaviors` `b`, 
-        `students` `s` 
-    WHERE
-        `b`.`student` = `s`.`id` AND  
-        ".$student." 
-        `start` BETWEEN '".$_GET['start']."' AND '".$_GET['end']."' 
-    ORDER BY 
-        `start` ASC";
+    $behavior = '';
+    if ($_GET['behavior'] != 'All') {
+        $student = "`behavior` = '".$_GET['behavior']."' AND";
+    }
+
+    $query = "SELECT * FROM `behaviors` WHERE ".$student." ".$behavior." `start` BETWEEN '".$_GET['start']."' AND '".$_GET['end']."' ORDER BY `start` ASC";
     if ($res = $mysql->query($query)) {
 
-        $return = [];
-        while ($row = $res->fetch_assoc()) {
-            $return[] = $row;
-        }
-        http_response_code(200);
-        
+
+
     } else {
 
         http_response_code(500);
         $return['error'] = $mysql->error;
 
     }
-
-    echo json_encode($return, JSON_HEX_APOS);
     
 }
 ?>
