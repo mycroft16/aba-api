@@ -8,59 +8,61 @@ header("Access-Control-Expose-Headers: Access-Control-Allow-Headers, Origin, Acc
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+function mapBehaviorNames($behavior) {
+    $behaviorNames = [
+        'Access' => 'ac',
+        'Aggression (Physical)' => 'agp',
+        'Aggression (Verbal)' => 'agv',
+        'Attention Seeking (Physical)' => 'atp',
+        'Attention Seeking (Verbal)' => 'atv',
+        'Escape' => 'es',
+        'Self-Stim' => 'ss'
+    ];
+    return $behaviorNames[$behavior];
+}
+
 if ($_SERVER['REQUEST_METHOD'] != "OPTIONS") {
 
     require_once('../../config.inc');
 
-    $startHour = ltrim(substr($_GET['start'], 11, 2), '0');
-    $startDate = substr($_GET['start'], 0, 11);
-    $endDate = substr($_GET['end'], 0, 11);
-    $defaultAll = [
-        'Access' => 0,
-        'Aggression (Physical)' => 0,
-        'Aggression (Verbal)' => 0,
-        'Attention Seeking (Physical)' => 0,
-        'Attention Seeking (Verbal)' => 0,
-        'Escape' => 0,
-        'Self-Stim' => 0
+    $defaultArray = [
+        'ac' => 0,
+        'agp' => 0,
+        'agv' => 0,
+        'atp' => 0,
+        'atv' => 0,
+        'es' => 0,
+        'ss' => 0
     ];
 
     $hoursWithData = [];
-    for($i = $startHour; $i <= 23; $i++) {
-        $h = $i;
-        if ($i < 10) {
-            $h = "0".$i;
-        }
-        $key = $startDate.$h.":00:00.000Z";
-        $hoursWithData[$key] = [];
-    }
-    for($i = 0; $i < $startHour; $i++) {
-        $h = $i;
-        if ($i < 10) {
-            $h = "0".$i;
-        }
-        $key = $endDate.$h.":00:00.000Z";
-        $hoursWithData[$key] = [];
-    }
-    $return['hwd'] = $hoursWithData;
 
     $student = '';
     if ($_GET['studentId'] != 'All') {
         $student = "`student` = '".$_GET['studentId']."' AND";
     }
 
-    $behavior = '';
-    if ($_GET['behavior'] != 'All') {
-        $student = "`behavior` = '".$_GET['behavior']."' AND";
-    }
-
-    $query = "SELECT * FROM `behaviors` WHERE ".$student." ".$behavior." `start` BETWEEN '".$_GET['start']."' AND '".$_GET['end']."' ORDER BY `start` ASC";
+    $query = "SELECT * FROM `behaviors` WHERE ".$student." `start` BETWEEN '".$_GET['start']."' AND '".$_GET['end']."' ORDER BY `start` ASC";
     if ($res = $mysql->query($query)) {
 
+        $return = [];
+
         while($row = $res->fetch_assoc()) {
+            $mappedBehaviorName = mapBehaviorNames($row['behavior']);
             $hour = substr($row['start'], 0, 14)."00:00.000Z";
-            $hoursWithData[$hour][] = $row['duration'];
+            if (!isset($hoursWithData[$hour])) {
+                $hoursWithData[$hour] = $defaultArray;
+            }
+            $hoursWithData[$hour][$mappedBehaviorName]++;
         }
+
+        foreach($hoursWithData as $key => $value) {
+            $return[] = array(
+                "date" => $key,
+                "values" => $value
+            );
+        }
+        http_response_code(200);
 
     } else {
 
