@@ -35,8 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] != "OPTIONS") {
         'ss' => 0
     ];
 
-    $hoursWithData = [];
-
     $student = '';
     if ($_GET['studentId'] != 'All') {
         $student = "`student` = '".$_GET['studentId']."' AND";
@@ -45,11 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] != "OPTIONS") {
     $query = "SELECT * FROM `behaviors` WHERE ".$student." `start` BETWEEN '".$_GET['start']."' AND '".$_GET['end']."' ORDER BY `start` ASC";
     if ($res = $mysql->query($query)) {
 
+        $hoursWithData = [];
         $return = [];
 
         while($row = $res->fetch_assoc()) {
             $mappedBehaviorName = mapBehaviorNames($row['behavior']);
-            $hour = substr($row['start'], 0, 14)."00:00.000Z";
+            $hour = substr($row['start'], 0, 13).":00:00.000Z";
             if (!isset($hoursWithData[$hour])) {
                 $hoursWithData[$hour] = $defaultArray;
             }
